@@ -2,37 +2,29 @@ import './Main.css';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Slider from '@mui/material/Slider';
-import TreeView from '@mui/lab/TreeView';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import TreeItem from '@mui/lab/TreeItem';
-import LoginButton from './LoginButton'
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import Link from '@mui/material/Link';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { useState } from 'react';
+import Gapi from './Gapi';
 
 function Main() {
   const [state, setState] = useState({});
-  const [data, setData] = useState(
-    [{
-      id: 'root',
-      name: 'Top1',
-      children: [
-        {
-          id: '1',
-          name: 'Child - 1',
-        },
-        {
-          id: '3',
-          name: 'Child - 3',
-          children: []
-        },
-      ]},
-      {
-        id: '2312',
-        name: 'Top2',
-        children: []
-    }]
-  );
-  
+  const [data, setData] = useState([]);
+  const [breadcrumbs, setBreadcrumbs] = useState([<Link underline="none" key="1" color="inherit" href="/" > 🖿 </Link>]);
+
+  const onGoogleFileListLoad = (event) => {
+    console.log('googleFileListLoad');
+    setData(event.detail.items);
+  }
+
+  window.addEventListener('googleFileListLoad', onGoogleFileListLoad);
+  const gapi = Gapi.getInstance();
+    
   state.player = new window.ChiptuneJsPlayer(new window.ChiptuneJsConfig(-1));
 
   function afterLoad(path, buffer) {
@@ -48,72 +40,49 @@ function Main() {
     state.player.stop();
   }
 
-  // setData({
-  //   id: 'root',
-  //   name: 'Parent',
-  //   children: [
-  //     {
-  //       id: '1',
-  //       name: 'Child - 1',
-  //     },
-  //     {
-  //       id: '3',
-  //       name: 'Child - 3',
-  //       children: [
-  //         {
-  //           id: '4',
-  //           name: 'Child - 4',
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // });
-  // data = {
-  //   id: 'root',
-  //   name: 'Parent',
-  //   children: [
-  //     {
-  //       id: '1',
-  //       name: 'Child - 1',
-  //     },
-  //     {
-  //       id: '3',
-  //       name: 'Child - 3',
-  //       children: [
-  //         {
-  //           id: '4',
-  //           name: 'Child - 4',
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // };
+  function afterLoad(path, buffer) {
+    state.player.play(buffer);
+    //setMetadata(path);
+    //pausePauseButton();
+    const event = new CustomEvent('modLoaded');
+    window.dispatchEvent(event);
+  }
 
-  // const renderTree = (nodes) => (
-    
-  //   <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
-  //     {Array.isArray(nodes.children)
-  //       ? nodes.children.map((node) => renderTree(node))
-  //       : null}
-  //   </TreeItem>
-  // );
 
-  const renderTree = (nodes) => {
+  const onBreadcrumbClick = (id, name) => {
+    const event = new CustomEvent('listLoadDir', {detail: {id}});
+    //breadcrumbs.push(<Link underline="none" key="1" color="inherit" onClick={() => onListDirClick(id)} > {name} </Link>);
+    setBreadcrumbs(breadcrumbs);
+    window.dispatchEvent(event);
+  }
+
+  const onListDirClick = (id, name) => {
+    const event = new CustomEvent('listLoadDir', {detail: {id}});
+    breadcrumbs.push(<Link underline="none" key="1" color="inherit" onClick={() => onBreadcrumbClick(id)} > {name} </Link>);
+    setBreadcrumbs(breadcrumbs);
+    window.dispatchEvent(event);
+  }
+
+  const onListFileClick = (id) => {
+    state.player.stop();
+    const headers = gapi.getAuthHeaders();
+    console.log(headers);
+    const path = `https://www.googleapis.com/drive/v3/files/${id}?alt=media`;
+    state.player.load(path, afterLoad.bind(this, path), headers);
+  }
+
+  const renderList = (nodes) => {
+    console.log('list render!');
     console.log(nodes);
-    nodes.map((node) => (
-      <TreeItem key={node.id} nodeId={node.id} label={node.name}>
-        {Array.isArray(node.children)
-        ? nodes.children.map((children) => renderTree(children))
-        : null}
-      </TreeItem>
-    ))
-  };
-
-  
-  const onDirLoad = (list) => {
-    console.log('onDirLoad');
-    console.log(list);
-    //setData(list);
+    return nodes.map((node) => {
+      return (<ListItem key={node.path} disablePadding dense>
+        <ListItemButton onClick={() => 
+          node.isDir ? onListDirClick(node.id, node.name) : onListFileClick(node.id, node.name)
+        }>
+        <ListItemText primary={(node.isDir ? "> " : "") + node.name} />
+        </ListItemButton>
+    </ListItem>)
+    })
   }
 
   return (
@@ -121,14 +90,29 @@ function Main() {
       <header className="App-header">
       <Grid container spacing={2} >
         <Grid container item xs={7} direction="column" >
-          <TreeView
-          aria-label="file system navigator"
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
-          sx={{ height: 240, flexGrow: 1 }}
-          >
-          {renderTree(data)}
-        </TreeView>
+        <Breadcrumbs sx={{
+          color: 'white',
+          margin: '1vh',
+          fontSize: 22,
+        }}
+        separator={<NavigateNextIcon fontSize="medium" />}
+        aria-label="breadcrumb"
+      >
+        {breadcrumbs}
+      </Breadcrumbs>
+        <List sx={{
+        width: '100%',
+        maxWidth: '40vw',
+        position: 'relative',
+        overflow: 'auto',
+        height: '96vh',
+        marginLeft: '1vw',
+        '& ul': { padding: 0 },
+        '& div': { padding: 0 },
+        '& span': { fontSize: 20 },
+      }}>
+        {renderList(data)}
+        </List>
         </Grid>
       <Grid container item xs={4} direction="column" >
         <p>
@@ -141,7 +125,7 @@ function Main() {
             max={100}
           />
           <br/>
-          <LoginButton onDirLoad={onDirLoad} >asdas</LoginButton>
+          <Button variant="contained" onClick={gapi.signIn}>Google Drive Login</Button>
           <Button variant="contained" onClick={playMod} >Play mod</Button>
           <Button variant="contained" onClick={stopMod} >Stop mod</Button>
         </p>

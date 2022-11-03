@@ -111,7 +111,7 @@ ChiptuneJsPlayer.prototype.unlock = function() {
   this.touchLocked = false;
 }
 
-ChiptuneJsPlayer.prototype.load = function(input, callback) {
+ChiptuneJsPlayer.prototype.load = function(input, callback, headers) {
 
   if (this.touchLocked) {
     this.unlock();
@@ -128,6 +128,9 @@ ChiptuneJsPlayer.prototype.load = function(input, callback) {
   } else {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', input, true);
+    if(typeof headers === 'object') {
+      headers.forEach((header) => xhr.setRequestHeader(header.key, header.value));
+    }
     xhr.responseType = 'arraybuffer';
     xhr.onload = function(e) {
       if (xhr.status === 200) {
