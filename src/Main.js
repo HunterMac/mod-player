@@ -13,7 +13,7 @@ import { useState } from 'react';
 import Gapi from './Gapi';
 
 function Main() {
-  const [state, setState] = useState({});
+  const [state] = useState({});
   const [data, setData] = useState([]);
   const [breadcrumbs, setBreadcrumbs] = useState([<Link underline="none" key="1" color="inherit" href="/" > 🖿 </Link>]);
 
@@ -26,11 +26,6 @@ function Main() {
   const gapi = Gapi.getInstance();
     
   state.player = new window.ChiptuneJsPlayer(new window.ChiptuneJsConfig(-1));
-
-  function afterLoad(path, buffer) {
-    console.log('play');
-    state.player.play(buffer);
-  }
 
   function playMod() {
     state.player.load('rfchip001.xm', afterLoad.bind(this, 'Muffler-Droppop.xm'));
@@ -47,7 +42,6 @@ function Main() {
     const event = new CustomEvent('modLoaded');
     window.dispatchEvent(event);
   }
-
 
   const onBreadcrumbClick = (id, name) => {
     const event = new CustomEvent('listLoadDir', {detail: {id}});

@@ -113,7 +113,7 @@ class Gapi {
           //     breadcrumbsClickCallback: this.breadcrumbsClickCallback.bind(this)}});
           // window.dispatchEvent(event);
         }
-      }.bind(this));
+      });//.bind(this));
   }
 }
 
