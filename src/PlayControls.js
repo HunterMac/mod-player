@@ -42,7 +42,7 @@ function PlayControls({moduleURL}) {
       if (playerManager.player.currentPlayingNode) {
         setPosition(playerManager.player.getCurrentTime());
       }
-    }, 1000);
+    }, 500);
   }, []);
 
   const setMetadata = (name) => {

@@ -13,11 +13,14 @@ import GapiManager from './GapiManager';
 import PlayControls from './PlayControls';
 
 const gapiManager = GapiManager.getInstance();
+const breadcrumbStyle = {
+  cursor: 'pointer'
+};
 
 function Main() {
   const [fileList, setFileList] = useState([]);
   const [moduleURL, setModuleUrl] = useState('');
-  const [breadcrumbs] = useState([<Link underline="none" key="0" color="inherit" href="/" data-index="0" > 🖿 </Link>]);
+  const [breadcrumbs] = useState([<Link underline="none" key="0" color="inherit" data-index="0" sx={breadcrumbStyle} onClick={() => onBreadcrumbClick('root', 1)} > 🖿 </Link>]);
 
   const onGoogleFileListLoad = (event) => {
     setFileList(event.detail.items);
@@ -34,12 +37,11 @@ function Main() {
   const onListDirClick = (id, name) => {
     const event = new CustomEvent('listLoadDir', {detail: {id}});
     const itemIndex = breadcrumbs.length + 1;
-    breadcrumbs.push(<Link key={id} underline="none" color="inherit" onClick={() => onBreadcrumbClick(id, itemIndex)} > {name} </Link>);
+    breadcrumbs.push(<Link key={id} underline="none" color="inherit" sx={breadcrumbStyle} onClick={() => onBreadcrumbClick(id, itemIndex)} > {name} </Link>);
     window.dispatchEvent(event);
   }
 
   const renderList = (nodes) => {
-    console.log('list render!');
     return nodes.map((node) => {
       return (<ListItem key={node.id} disablePadding dense>
         <ListItemButton onClick={() => 
