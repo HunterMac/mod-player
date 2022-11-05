@@ -115,14 +115,15 @@ function PlayControls({moduleURL}) {
           <IconButton
             aria-label={paused ? 'play' : 'pause'}
             onClick={() => onPlayToggle(!paused)}
+            sx={{ position: 'relative', top: '-20px' }}
           >
             {paused ? (
               <PlayCircleRoundedIcon
-                sx={{ fontSize: '4rem' }}
+                sx={{ fontSize: '5.5rem' }}
                 htmlColor={mainIconColor}
               />
             ) : (
-              <PauseCircleFilledRoundedIcon sx={{ fontSize: '4rem' }} htmlColor={mainIconColor} />
+              <PauseCircleFilledRoundedIcon sx={{ fontSize: '5.5rem' }} htmlColor={mainIconColor} />
             )}
           </IconButton>
         </div>

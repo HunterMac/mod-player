@@ -68,6 +68,12 @@ ChiptuneJsPlayer.prototype.getCurrentOrder = function() {
   return libopenmpt._openmpt_module_get_current_order(this.currentPlayingNode.modulePtr);  
 }
 
+ChiptuneJsPlayer.prototype.setCurrentTime = function(position) {
+  if(this.currentPlayingNode) {
+    libopenmpt._openmpt_module_set_position_seconds(this.currentPlayingNode.modulePtr, position);
+  }
+}
+
 ChiptuneJsPlayer.prototype.getCurrentTime = function () {
   return libopenmpt._openmpt_module_get_position_seconds(this.currentPlayingNode.modulePtr);
 };
