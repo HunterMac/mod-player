@@ -1,8 +1,7 @@
 
-class Gapi {
+class GapiManager {
 
   constructor() {
-    console.log("Gapi constructor()");
     this.apiConfig = {
       apiKey: 'AIzaSyC-q4z98BSwQFWRFtmCopQZbmOcu01SnNI',
       clientId: '643125844926-j2b9rdmvu7fdrs981r9el3s67ae73ktp.apps.googleusercontent.com',
@@ -13,25 +12,21 @@ class Gapi {
     this.loadGapi();
   }
 
-  onListLoadDir(event) {
-    console.log(event.detail);
-    this.listFiles(event.detail.id);
-  }
-
-
   static getInstance() {
     if (!this.instance){
-      this.instance = new Gapi()
+      this.instance = new GapiManager()
    }
    return this.instance;
+  }
+
+  onListLoadDir(event) {
+    this.listFiles(event.detail.id);
   }
 
   loadGapi() {
     const script = document.createElement("script");
     script.src = "https://apis.google.com/js/api.js";
-
     script.onload = () => {
-      console.log('script load!');
       window.gapi.load('client', this.initGoogle.bind(this));
     };
 
@@ -42,8 +37,6 @@ class Gapi {
     console.log('Google loaded!');
     window.gapi.client.init(this.apiConfig)
       .then(function() {
-      // 3. Initialize and make the API request.
-      //console.log(window.gapi.auth2.getAuthInstance().isSignedIn.get());
       this.listFiles();
       
     }.bind(this));
@@ -61,10 +54,13 @@ class Gapi {
     }]
   }
 
-  listFiles(id) {
-    if (!id) {
-      id = 'root';
-    }
+  getFileUrl(id) {
+    return `https://www.googleapis.com/drive/v3/files/${id}?alt=media`;
+  }
+
+  listFiles(dirId) {
+    const id = dirId || 'root';
+
     const options = {
       'pageSize': 500,
       'includeItemsFromAllDrives': false,
@@ -72,10 +68,10 @@ class Gapi {
       'fields': "nextPageToken, files(id, name, mimeType, parents)",
       'q': `'${id}' in parents`
     };
-  
+
     window.gapi.client.drive.files.list(options)
       .then(function (response) {
-        var files = response.result.files;
+        const files = response.result.files;
         if (files && files.length > 0) {
           const dirMimeType ='application/vnd.google-apps.folder';
           files.sort((a, b) => {
@@ -86,35 +82,19 @@ class Gapi {
   
           const items = [];
           files.forEach((file) => {
-            let path = '';
-            let isDir = false;
-            if (file.mimeType === dirMimeType) {
-              path = file.id;
-              isDir = true;
-            } else {
-              path = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`;            
-            }
+            let isDir = file.mimeType === dirMimeType;
             items.push({
               id: file.id,
               name: file.name,
-              path,
               isDir
             });
           });
 
-          //console.log(items);
-          //callback(items);
           const event = new CustomEvent('googleFileListLoad', {detail: {items}});
           window.dispatchEvent(event);
-          // const event = new CustomEvent('updatePlaylist', {detail: {
-          //     items, 
-          //     songClickCallback: songClickCallback.bind(this), 
-          //     dirClickCallback: dirClickCallback.bind(this), 
-          //     breadcrumbsClickCallback: this.breadcrumbsClickCallback.bind(this)}});
-          // window.dispatchEvent(event);
         }
-      });//.bind(this));
+      });
   }
 }
 
-export default Gapi;
+export default GapiManager;
