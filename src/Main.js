@@ -45,7 +45,7 @@ const fileListStyle = {
 
 function Main() {
   const [fileList, setFileList] = useState([]);
-  const [moduleURL, setModuleUrl] = useState('');
+  const [moduleInfo, setModuleInfo] = useState({});
   const [breadcrumbs] = useState([<Link underline="none" key="0" color="inherit" data-index="0" sx={breadcrumbLinkStyle} 
     onClick={() => onBreadcrumbClick('root', 1)} > 🖿 
     </Link>]);
@@ -73,7 +73,7 @@ function Main() {
     return nodes.map((node) => {
       return (<ListItem key={node.id} disablePadding dense>
         <ListItemButton onClick={() => 
-          node.isDir ? onListDirClick(node.id, node.name) : setModuleUrl(gapiManager.getFileUrl(node.id))
+          node.isDir ? onListDirClick(node.id, node.name) : setModuleInfo({url: gapiManager.getFileUrl(node.id), fileName:node.name})
         }>
         <ListItemText primary={(node.isDir ? "> " : "") + node.name} />
         </ListItemButton>
@@ -101,7 +101,7 @@ function Main() {
         </List>
         </Grid>
         <Grid container item xs={4} direction='column' >
-          <PlayControls moduleURL={moduleURL} />
+          <PlayControls moduleInfo={moduleInfo} />
           <Button variant="contained" onClick={gapiManager.signIn}>Google Drive Login</Button>
         </Grid>
       </Grid>

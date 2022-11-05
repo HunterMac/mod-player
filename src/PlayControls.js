@@ -23,19 +23,19 @@ const TinyText = styled(Typography)({
 
 const mainIconColor = '#fff';
 
-function PlayControls({moduleURL}) {
+function PlayControls({moduleInfo}) {
   const [name, setName] = useState('No module playing')
   const [paused, setPaused] = useState(false);
   const [currentPosition, setPosition] = useState(0);
   const [duration, setDuration] = useState(100);
 
   useEffect(() => {
-    if (moduleURL && moduleURL !== '') {
+    if (moduleInfo && moduleInfo.url) {
       playerManager.player.stop();
       const headers = gapi.getAuthHeaders();
-      playerManager.player.load(moduleURL, afterLoad.bind(this, name), headers);
+      playerManager.player.load(moduleInfo.url, afterLoad.bind(this, moduleInfo.fileName), headers);
     }
-  }, [moduleURL]);
+  }, [moduleInfo]);
 
   useEffect(() => {
     setInterval(() => {
@@ -48,10 +48,10 @@ function PlayControls({moduleURL}) {
   const setMetadata = (name) => {
     const metadata = playerManager.player.metadata();
     var result = '';
-    if (metadata['artist'] != '') {
+    if (metadata['artist'] !== '') {
       result += metadata['artist'] + ' : ';
     }
-    if (metadata['title'] != '') {
+    if (metadata['title'] !== '') {
       result += metadata['title'];
     } else {
       result += name;
