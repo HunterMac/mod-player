@@ -13,14 +13,42 @@ import GapiManager from './GapiManager';
 import PlayControls from './PlayControls';
 
 const gapiManager = GapiManager.getInstance();
-const breadcrumbStyle = {
+const breadcrumbLinkStyle = {
   cursor: 'pointer'
+};
+
+const fileListStyle = {
+  width: '100%',
+  maxWidth: '40vw',
+  position: 'relative',
+  overflow: 'auto',
+  height: '94vh',
+  padding:0,
+  marginLeft: '1vw',
+  '& ul': { padding: 0 },
+  '& div': { padding: 0 },
+  '& span': { fontSize: 20, lineHeight: 'inherit' },
+  scrollbarWidth: 'auto',
+  '&::-webkit-scrollbar': {
+    width: '0.4em',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: "#f1f1f1",
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: '#888',
+  },
+  '&::-webkit-scrollbar-thumb:hover': {
+    background: '#555'
+  }
 };
 
 function Main() {
   const [fileList, setFileList] = useState([]);
   const [moduleURL, setModuleUrl] = useState('');
-  const [breadcrumbs] = useState([<Link underline="none" key="0" color="inherit" data-index="0" sx={breadcrumbStyle} onClick={() => onBreadcrumbClick('root', 1)} > 🖿 </Link>]);
+  const [breadcrumbs] = useState([<Link underline="none" key="0" color="inherit" data-index="0" sx={breadcrumbLinkStyle} 
+    onClick={() => onBreadcrumbClick('root', 1)} > 🖿 
+    </Link>]);
 
   const onGoogleFileListLoad = (event) => {
     setFileList(event.detail.items);
@@ -37,7 +65,7 @@ function Main() {
   const onListDirClick = (id, name) => {
     const event = new CustomEvent('listLoadDir', {detail: {id}});
     const itemIndex = breadcrumbs.length + 1;
-    breadcrumbs.push(<Link key={id} underline="none" color="inherit" sx={breadcrumbStyle} onClick={() => onBreadcrumbClick(id, itemIndex)} > {name} </Link>);
+    breadcrumbs.push(<Link key={id} underline="none" color="inherit" sx={breadcrumbLinkStyle} onClick={() => onBreadcrumbClick(id, itemIndex)} > {name} </Link>);
     window.dispatchEvent(event);
   }
 
@@ -68,23 +96,12 @@ function Main() {
       >
         {breadcrumbs}
       </Breadcrumbs>
-        <List sx={{
-        width: '100%',
-        maxWidth: '40vw',
-        position: 'relative',
-        overflow: 'auto',
-        height: '96vh',
-        padding:0,
-        marginLeft: '1vw',
-        '& ul': { padding: 0 },
-        '& div': { padding: 0 },
-        '& span': { fontSize: 20, lineHeight: 'inherit' },
-      }}>
+        <List sx={fileListStyle}>
         {renderList(fileList)}
         </List>
         </Grid>
         <Grid container item xs={4} direction='column' >
-          <PlayControls moduleURL={moduleURL}/>
+          <PlayControls moduleURL={moduleURL} />
           <Button variant="contained" onClick={gapiManager.signIn}>Google Drive Login</Button>
         </Grid>
       </Grid>

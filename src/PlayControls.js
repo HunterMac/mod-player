@@ -83,8 +83,15 @@ function PlayControls({moduleURL}) {
   }
 
   return (
-        <div>
-          {name} 
+        <div sx={{marginTop:'260px'}}>
+          <Typography
+          sx={{
+            fontSize: 30,
+            marginTop: 2,
+            marginBottom: 1
+          }}
+          
+          >{name}</Typography>
           <Slider
             aria-label="time-indicator"
             min={0}
